@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "TimerManager.h"
 #include "GameFramework/Actor.h"
+#include "Kismet/GameplayStatics.h"
 #include "Engine/EngineTypes.h"
 #include "Projectile.h"
 #include "DualVector.h"
@@ -12,7 +13,8 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Kismet/KismetSystemLibrary.h" 
 #include "GenericPlatform/GenericPlatformMath.h"
-#include "Camera/CameraComponent.h"
+#include "Camera/CameraComponent.h" 	
+#include "Particles/ParticleSystem.h"
 
 #include "Weapon.generated.h"
 
@@ -67,6 +69,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Camera)
 		UCameraComponent* ADSCamera;
+
+	TSubclassOf<UParticleSystem> muzzleFlashClass;
+	UParticleSystem* muzzleFlash;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

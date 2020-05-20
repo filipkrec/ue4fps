@@ -26,6 +26,10 @@ AWeapon::AWeapon()
 	ADSCamera->AttachTo(WeaponMesh);
 	ADSCamera->SetRelativeLocation(FVector(-0.098, -45.17f, -118.265f));
 	ADSCamera->SetRelativeRotation(FRotator(90.0f, 44.0f, -44.0f));  //Y Z X
+
+	ConstructorHelpers::FObjectFinder<UParticleSystem>PSystem(TEXT("ParticleSystem'/Game/InfinityBladeEffects/Effects/FX_Monsters/FX_Monster_Chicken/P_ChickenMaster_MuzzleFlash_01.P_ChickenMaster_MuzzleFlash_01'"));
+	if (PSystem.Succeeded())
+		muzzleFlash = PSystem.Object;
 }
 
 // Called when the game starts or when spawned
@@ -62,6 +66,8 @@ void AWeapon::Fire(ACharacter* character)
 				--clipCurrent;
 			}
 		}
+		FTransform mflashTransform(direction, MuzzleLocation, FVector(0.1f, 0.1f, 0.1f));
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(),muzzleFlash, mflashTransform);
 	}
 }
 

@@ -36,12 +36,14 @@ public:
 	// Sets default values for this character's properties
 	AMainCharacter();
 
+	//COMPONENTS
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Camera)
 		USpringArmComponent* cameraBoom;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Camera)
 		UCameraComponent* followCamera;
 
+	//ENERGY VALUES
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Values)
 		int health;
 
@@ -51,6 +53,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Values)
 		int energy;
 
+	//WIDGETS
 	UPROPERTY(EditAnywhere, Category = "UI")
 		TSubclassOf<UUserWidget> Player_Shield_Widget_Class;
 	UUserWidget* Player_Shield_Widget;
@@ -60,17 +63,17 @@ public:
 	UTextBlock* ClipText;
 	UTextBlock* AmmoText;
 
+	//TIMERS
 	FTimerHandle RegenTimer;
 	FTimerHandle FireTimer;
+	FTimerHandle ReloadingTimer;
 
-
+	//WEAPON
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	TSubclassOf<AWeapon> WeaponClass;
 	AWeapon* Weapon;
 
-	UPROPERTY(BlueprintReadWrite, Category = "Movement")
-	bool sprinting;
-
+	//MOVEMENT
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Movement")
 	int sprintIncrease;
 
@@ -80,7 +83,14 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Sprint")
 	int sprintIncreasePercentage = 30;
 
+	//STATES
 	bool dead;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Movement")
+	bool reloading;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Movement")
+	bool sprinting;
 
 	void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 protected:
@@ -101,6 +111,7 @@ protected:
 	void Die();
 
 	void Reload();
+	void Reloaded();
 	void FireStart();
 	void FireStop();
 

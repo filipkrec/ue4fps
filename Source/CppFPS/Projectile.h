@@ -8,6 +8,7 @@
 #include "GameFramework/ProjectileMovementComponent.h" 
 #include "Components/StaticMeshComponent.h"
 #include "UObject/ConstructorHelpers.h"
+#include "Kismet/KismetSystemLibrary.h" 
 #include "Projectile.generated.h"
 
 UCLASS()
@@ -39,6 +40,11 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = Movement)
 		UStaticMeshComponent* StaticMesh;
 
+	UFUNCTION()
+		void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+
+
 	void FireInDirection(const FVector& ShootDirection);
 
+	
 };

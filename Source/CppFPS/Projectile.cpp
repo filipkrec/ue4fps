@@ -13,6 +13,11 @@ AProjectile::AProjectile()
 	CollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent"));
 	// Set the sphere's collision radius.
 	CollisionComponent->InitSphereRadius(3.5f);
+	CollisionComponent->SetCollisionProfileName("BlockAll");
+	CollisionComponent->SetNotifyRigidBodyCollision(true);
+
+	CollisionComponent->OnComponentHit.AddDynamic(this, &AProjectile::OnHit);
+	
 	// Set the root component to be the collision component.
 	RootComponent = CollisionComponent;
 
@@ -50,13 +55,13 @@ AProjectile::AProjectile()
 	ProjectileMovementComponent->Bounciness = 0.1f;
 	ProjectileMovementComponent->ProjectileGravityScale = 0.3f;
 
+
 }
 
 // Called when the game starts or when spawned
 void AProjectile::BeginPlay()
 {
 	Super::BeginPlay();
-
 }
 
 // Called every frame
@@ -69,5 +74,10 @@ void AProjectile::Tick(float DeltaTime)
 void AProjectile::FireInDirection(const FVector& ShootDirection)
 {
 	ProjectileMovementComponent->Velocity = ShootDirection * ProjectileMovementComponent->InitialSpeed;
+}
+
+void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+		Destroy();
 }
 

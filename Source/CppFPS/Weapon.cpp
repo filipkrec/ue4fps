@@ -20,6 +20,7 @@ AWeapon::AWeapon()
 	ammoCurrent = 100;
 	firingMode = FiringMode::Automatic;
 	attackPerSecond = 8;
+	range = 2000.0f;
 
 	ADSCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("ADSCamera"));
 	ADSCamera->bUsePawnControlRotation = true;
@@ -49,19 +50,34 @@ void AWeapon::Fire(ACharacter* character)
 {
 	if (WeaponMesh != nullptr && clipCurrent != 0)
 	{
-		FRotator direction = character->GetViewRotation();
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.Owner = character;
-		SpawnParams.Instigator = Instigator;
+		FRotator direction;
+		FVector charVector;
+
+		character->GetController()->GetPlayerViewPoint(charVector, direction);
 
 		FVector MuzzleLocation = WeaponMesh->GetSocketLocation("AKSocket");
 		if (ProjectileClass != nullptr)
 		{
-			AProjectile* Projectile = GetWorld()->SpawnActor<AProjectile>(ProjectileClass, MuzzleLocation, direction, SpawnParams);
+			AProjectile* Projectile = GetWorld()->SpawnActor<AProjectile>(ProjectileClass, MuzzleLocation, direction, FActorSpawnParameters());
 			if (Projectile != nullptr)
 			{
-				// Set the projectile's initial trajectory.
-				FVector LaunchDirection = direction.Vector();
+				FVector LaunchVector = direction.Vector() * range;
+				FHitResult hitResult;
+				FVector endPoint;
+				if(GetWorld()->LineTraceSingleByChannel(hitResult, MuzzleLocation + direction.Vector() * 100, charVector + LaunchVector, ECC_Visibility, FCollisionQueryParams()))
+				{
+					if (hitResult.Actor->GetClass() != ProjectileClass.Get())
+					{
+						endPoint = hitResult.ImpactPoint;
+						//UKismetSystemLibrary::PrintString(GetWorld(), "Impact point = " + hitResult.ImpactPoint.ToString());
+					}
+				}
+				else
+					endPoint = hitResult.TraceEnd;
+
+				FVector LaunchDirection = endPoint - MuzzleLocation;
+
+				LaunchDirection.Normalize();
 				Projectile->FireInDirection(LaunchDirection);
 				--clipCurrent;
 			}

@@ -3,7 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "DrawDebugHelpers.h"
 #include "TimerManager.h"
+#include "Engine/World.h"
 #include "GameFramework/Actor.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/EngineTypes.h"
@@ -15,7 +17,6 @@
 #include "GenericPlatform/GenericPlatformMath.h"
 #include "Camera/CameraComponent.h" 	
 #include "Particles/ParticleSystem.h"
-
 #include "Weapon.generated.h"
 
 UCLASS()
@@ -44,6 +45,9 @@ public:
 		float fireVelocity;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shot")
+		float range;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shot")
 		float spread;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ammo")
@@ -57,6 +61,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ammo")
 		int ammoCurrent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ammo")
+		int reloadSpeed;
 
 	FiringMode firingMode;
 	FTimerHandle firingTimer;

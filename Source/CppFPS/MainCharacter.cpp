@@ -157,9 +157,10 @@ void AMainCharacter::Sprint()
 {
 	if (!dead && !GetMovementComponent()->IsCrouching() && sprinting == false)
 	{
+		FireStop();
 		sprinting = true;
+		GetCharacterMovement()->MaxWalkSpeed += sprintIncrease;
 	}
-	GetCharacterMovement()->MaxWalkSpeed += sprintIncrease;
 }
 
 void AMainCharacter::EndSprint()
@@ -227,6 +228,7 @@ void AMainCharacter::RegenShield()
 
 void AMainCharacter::FireStart()
 {
+	if(sprinting == false && reloading == false)
 	Weapon->StartFiring(this);
 }
 
@@ -240,10 +242,19 @@ void AMainCharacter::FireStop()
 
 void AMainCharacter::Reload()
 {
-	if (Weapon != nullptr)
+	FireStop();
+	if (Weapon != nullptr && Weapon->ammoCurrent > 0)
 	{
-		Weapon->Reload();
+		reloading = true;
+		GetWorldTimerManager().SetTimer(ReloadingTimer, this, &AMainCharacter::Reloaded,2.4f,false,2.4f);
 	}
+}
+
+void AMainCharacter::Reloaded()
+{
+	Weapon->Reload();
+	reloading = false;
+	GetWorldTimerManager().ClearTimer(ReloadingTimer);
 }
 
 

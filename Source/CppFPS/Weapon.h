@@ -23,8 +23,8 @@ UCLASS()
 class CPPFPS_API AWeapon : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	// Sets default values for this actor's properties
 
 	enum class FiringMode {
@@ -36,7 +36,7 @@ public:
 	AWeapon();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shot")
-		float damage;
+		int damage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shot")
 		int attackPerSecond;
@@ -82,13 +82,13 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	
-public:	
+
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION()
-	void Fire(ACharacter* character);
+		void Fire(ACharacter* character);
 
 	void StartFiring(ACharacter* character);
 	void StopFiring(ACharacter* character);

@@ -6,7 +6,7 @@
 // Sets default values
 AMainCharacter::AMainCharacter()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	GetCapsuleComponent()->InitCapsuleSize(42.0f, 96.0f);
@@ -19,7 +19,7 @@ AMainCharacter::AMainCharacter()
 
 	GetMesh()->SetSkeletalMesh(ConstructorHelpers::FObjectFinder<USkeletalMesh>(TEXT("SkeletalMesh'/Game/ThirdPersonCPP/Character/Swat.Swat'")).Object);
 	GetMesh()->SetRelativeLocation(FVector(0.0f, 0.0f, -90.0f));
-	GetMesh()->SetRelativeRotation(FRotator(0.0f,-90.0f,0.0f)); 
+	GetMesh()->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 	GetMesh()->SetAnimInstanceClass(AnimBp);
 
@@ -30,18 +30,18 @@ AMainCharacter::AMainCharacter()
 	GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
 
 	followCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
-	followCamera->AttachTo(GetMesh(),"head");
+	followCamera->AttachTo(GetMesh(), "head");
 	followCamera->bUsePawnControlRotation = true;
-	
+
 	followCamera->SetRelativeLocation(FVector(0.0f, 2.0f, 15.0f));
 	followCamera->SetRelativeRotation(FRotator(80.0f, -90.0f, -180.0f));  // y , z , x
-	
+
 	ConstructorHelpers::FClassFinder<UUserWidget> BPShield(TEXT("/Game/ThirdPersonCPP/Blueprints/Shield_UI"));
 	Player_Shield_Widget_Class = BPShield.Class;
 
 	WeaponClass = ConstructorHelpers::FClassFinder<AWeapon>(TEXT("Class'/Script/CppFPS.Weapon'")).Class;
 	dead = false;
-	
+
 	sprintIncreasePercentage = 30;
 	sprintIncrease = (GetCharacterMovement()->MaxWalkSpeed / 100) * sprintIncreasePercentage;
 
@@ -56,7 +56,7 @@ void AMainCharacter::BeginPlay()
 	dead = false;
 
 	if (Player_Shield_Widget_Class != nullptr)
-	{		   
+	{
 		Player_Shield_Widget = CreateWidget(GetWorld(), Player_Shield_Widget_Class);
 		Player_Shield_Widget->AddToViewport();
 		ShieldBar = Player_Shield_Widget->WidgetTree->FindWidget<UProgressBar>("Shield");
@@ -129,8 +129,8 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 void AMainCharacter::Jump()
 {
-	if(!dead)
-	Super::Jump();
+	if (!dead)
+		Super::Jump();
 }
 
 
@@ -177,7 +177,7 @@ void AMainCharacter::MoveForward(float Axis)
 	if (!dead)
 	{
 		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0,Rotation.Yaw,0);
+		const FRotator YawRotation(0, Rotation.Yaw, 0);
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 		AddMovementInput(Direction, Axis);
 	}
@@ -222,21 +222,21 @@ void AMainCharacter::TakeDamage()
 
 void AMainCharacter::RegenShield()
 {
-	if(shield < 100)
+	if (shield < 100)
 		shield += 1;
 }
 
 void AMainCharacter::FireStart()
 {
-	if(sprinting == false && reloading == false)
-	Weapon->StartFiring(this);
+	if (sprinting == false && reloading == false)
+		Weapon->StartFiring(this);
 }
 
 void AMainCharacter::FireStop()
 {
 	if (Weapon != nullptr)
 	{
-			Weapon->StopFiring(this);
+		Weapon->StopFiring(this);
 	}
 }
 
@@ -246,7 +246,7 @@ void AMainCharacter::Reload()
 	if (Weapon != nullptr && Weapon->ammoCurrent > 0)
 	{
 		reloading = true;
-		GetWorldTimerManager().SetTimer(ReloadingTimer, this, &AMainCharacter::Reloaded,2.4f,false,2.4f);
+		GetWorldTimerManager().SetTimer(ReloadingTimer, this, &AMainCharacter::Reloaded, 2.4f, false, 2.4f);
 	}
 }
 
@@ -260,13 +260,13 @@ void AMainCharacter::Reloaded()
 
 void AMainCharacter::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
-	
+
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 	if (PropertyChangedEvent.GetPropertyName() == "sprintIncrease")
-		sprintIncreasePercentage = (float) sprintIncrease / GetCharacterMovement()->MaxWalkSpeed * 100;
+		sprintIncreasePercentage = (float)sprintIncrease / GetCharacterMovement()->MaxWalkSpeed * 100;
 	else if (PropertyChangedEvent.GetPropertyName() == "sprintIncreasePercentage")
 		sprintIncrease = GetCharacterMovement()->MaxWalkSpeed / 100 * sprintIncreasePercentage;
-	
+
 }
 
 
@@ -287,7 +287,7 @@ void AMainCharacter::ADSOn()
 	if (Weapon != nullptr)
 	{
 		followCamera->Deactivate();
-		UGameplayStatics::GetPlayerController(GetWorld(), 0)->SetViewTargetWithBlend(Weapon, 0.5f);
+		UGameplayStatics::GetPlayerController(GetWorld(), 0)->SetViewTarget(Weapon);
 		Weapon->ADSCamera->Activate();
 		GetCharacterMovement()->MaxWalkSpeed -= ADSMoveSpeedDecrease;
 	}

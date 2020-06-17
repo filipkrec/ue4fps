@@ -13,11 +13,12 @@ AProjectile::AProjectile()
 	CollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent"));
 	// Set the sphere's collision radius.
 	CollisionComponent->InitSphereRadius(3.5f);
-	CollisionComponent->SetCollisionProfileName("BlockAll");
+	CollisionComponent->SetCollisionProfileName("NoTrace");
 	CollisionComponent->SetNotifyRigidBodyCollision(true);
+	CollisionComponent->bVisibleInRayTracing = false;
 
 	CollisionComponent->OnComponentHit.AddDynamic(this, &AProjectile::OnHit);
-	
+
 	// Set the root component to be the collision component.
 	RootComponent = CollisionComponent;
 
@@ -30,6 +31,7 @@ AProjectile::AProjectile()
 		ConstructorHelpers::FObjectFinder<UMaterial>material(TEXT("/Game/StarterContent/Materials/M_Metal_Burnished_Steel.M_Metal_Burnished_Steel"));
 		StaticMesh->SetMaterial(0, (UMaterialInterface*)material.Object);
 		StaticMesh->SetupAttachment(RootComponent);
+		StaticMesh->SetCollisionProfileName("NoTrace");
 
 		FVector Scale;
 		Scale.X = 0.07f;
@@ -54,8 +56,6 @@ AProjectile::AProjectile()
 	ProjectileMovementComponent->bShouldBounce = true;
 	ProjectileMovementComponent->Bounciness = 0.1f;
 	ProjectileMovementComponent->ProjectileGravityScale = 0.3f;
-
-
 }
 
 // Called when the game starts or when spawned
@@ -78,6 +78,18 @@ void AProjectile::FireInDirection(const FVector& ShootDirection)
 
 void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-		Destroy();
+
+	if (OtherActor->GetClass()->IsChildOf<ASimpleAI>())
+	{
+		ASimpleAI* character = Cast<ASimpleAI>(OtherActor);
+		_ASSERT(character != nullptr);
+		if (character->health > 0)
+		{
+			character->health -= damage;
+			UKismetSystemLibrary::PrintString(GetWorld(), FString::FromInt(character->health));
+		}
+	}
+
+	Destroy();
 }
 

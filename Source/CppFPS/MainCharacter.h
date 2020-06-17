@@ -21,9 +21,14 @@
 #include "Blueprint/WidgetTree.h"
 #include "Weapon.h"
 #include "Projectile_AK47.h"
-#include "Kismet/KismetSystemLibrary.h" 
 #include "Components/TextBlock.h"
 #include "Kismet/GameplayStatics.h"
+
+#ifdef KISMET 
+#define PRINT_STRING(S) UKismetSystemLibrary::PrintString(GetWorld(), S)
+#else
+#define PRINT_STRING(S) ((void)0)
+#endif
 
 #include "MainCharacter.generated.h"
 
@@ -35,7 +40,6 @@ class CPPFPS_API AMainCharacter : public ACharacter
 public:
 	// Sets default values for this character's properties
 	AMainCharacter();
-
 	//COMPONENTS
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Camera)
 		USpringArmComponent* cameraBoom;
@@ -70,27 +74,27 @@ public:
 
 	//WEAPON
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
-	TSubclassOf<AWeapon> WeaponClass;
+		TSubclassOf<AWeapon> WeaponClass;
 	AWeapon* Weapon;
 
 	//MOVEMENT
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Movement")
-	int sprintIncrease;
+		int sprintIncrease;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Movement")
-	int ADSMoveSpeedDecrease;
+		int ADSMoveSpeedDecrease;
 
 	UPROPERTY(EditAnywhere, Category = "Sprint")
-	int sprintIncreasePercentage = 30;
+		int sprintIncreasePercentage = 30;
 
 	//STATES
 	bool dead;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Movement")
-	bool reloading;
+		bool reloading;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Movement")
-	bool sprinting;
+		bool sprinting;
 
 	void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 protected:
@@ -121,7 +125,7 @@ protected:
 	void UpdateAmmoText();
 
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 

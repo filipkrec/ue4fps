@@ -3,6 +3,7 @@
 
 
 #include "Projectile.h"
+#define DEBUG_CUSTOM 1
 
 // Sets default values
 AProjectile::AProjectile()
@@ -86,7 +87,9 @@ void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimi
 		if (character->health > 0)
 		{
 			character->health -= damage;
+#ifdef DEBUG_CUSTOM
 			UKismetSystemLibrary::PrintString(GetWorld(), FString::FromInt(character->health));
+#endif
 		}
 	}
 

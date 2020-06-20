@@ -2,6 +2,7 @@
 
 
 #include "MainCharacter.h"
+#define DEBUG_CUSTOM 1
 
 // Sets default values
 AMainCharacter::AMainCharacter()
@@ -40,20 +41,19 @@ AMainCharacter::AMainCharacter()
 	Player_Shield_Widget_Class = BPShield.Class;
 
 	WeaponClass = ConstructorHelpers::FClassFinder<AWeapon>(TEXT("Class'/Script/CppFPS.Weapon'")).Class;
-	dead = false;
 
 	sprintIncreasePercentage = 30;
 	sprintIncrease = (GetCharacterMovement()->MaxWalkSpeed / 100) * sprintIncreasePercentage;
 
 	ADSMoveSpeedDecrease = 300;
+
+	AddState(playerState::STILL);
 }
 
 // Called when the game starts or when spawned
 void AMainCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
-	dead = false;
 
 	if (Player_Shield_Widget_Class != nullptr)
 	{
@@ -66,7 +66,7 @@ void AMainCharacter::BeginPlay()
 		AmmoText = Player_Shield_Widget->WidgetTree->FindWidget<UTextBlock>("Ammo");
 	}
 
-	if (!dead)
+	if (!CheckState(playerState::DEAD))
 	{
 		GetWorldTimerManager().SetTimer(RegenTimer, this, &AMainCharacter::RegenShield, 0.2, true, 0.0f);
 	}
@@ -92,6 +92,8 @@ void AMainCharacter::BeginPlay()
 void AMainCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	if (GetCharacterMovement()->Velocity == FVector(0.0f))
+		AddState(playerState::STILL);
 	HealthBar->SetPercent(FMath::Clamp((float)health / 100.0f, 0.0f, 1.0f));
 	ShieldBar->SetPercent(FMath::Clamp((float)shield / 100.0f, 0.0f, 1.0f));
 	UpdateAmmoText();
@@ -129,53 +131,67 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 void AMainCharacter::Jump()
 {
-	if (!dead)
-		Super::Jump();
+	if (!CheckState(playerState::DEAD))
+	{
+		if (!CheckState(playerState::CROUCHING))
+			Super::Jump();
+		else
+			ToggleCrouch();
+	}
 }
 
 
 void AMainCharacter::ToggleCrouch()
 {
-	if (!dead)
+	if (!CheckState(playerState::DEAD))
 	{
-		sprinting = false;
-
 		if (GetMovementComponent()->IsCrouching())
+		{
 			Super::UnCrouch();
+			ClearState(playerState::CROUCHING);
+		}
 		else
 		{
 			Super::Crouch();
+			AddState(playerState::CROUCHING);
 			EndSprint();
 		}
-
-
 	}
 }
 
 
 void AMainCharacter::Sprint()
 {
-	if (!dead && !GetMovementComponent()->IsCrouching() && sprinting == false)
+	if (!CheckState(playerState::DEAD) && !CheckState(playerState::SPRINTING))
 	{
 		FireStop();
-		sprinting = true;
+		if(CheckState(playerState::CROUCHING))
+		{
+			ToggleCrouch();
+		}
+		AddState(playerState::SPRINTING);
 		GetCharacterMovement()->MaxWalkSpeed += sprintIncrease;
 	}
 }
 
 void AMainCharacter::EndSprint()
 {
-	if (sprinting)
+	if (CheckState(playerState::SPRINTING))
 	{
 		GetCharacterMovement()->MaxWalkSpeed -= sprintIncrease;
 	}
-	sprinting = false;
+	ClearState(playerState::SPRINTING);
 }
 
 void AMainCharacter::MoveForward(float Axis)
 {
-	if (!dead)
+	if (!CheckState(playerState::DEAD))
 	{
+		if (CheckState(playerState::STILL))
+		{
+			ClearState(playerState::STILL);
+			AddState(playerState::WALKING);
+		}
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
@@ -185,8 +201,13 @@ void AMainCharacter::MoveForward(float Axis)
 
 void AMainCharacter::MoveRight(float Axis)
 {
-	if (!dead)
+	if (!CheckState(playerState::DEAD))
 	{
+		if(CheckState(playerState::STILL))
+		{
+			ClearState(playerState::STILL);
+			AddState(playerState::WALKING);
+		}
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
@@ -196,15 +217,15 @@ void AMainCharacter::MoveRight(float Axis)
 
 void AMainCharacter::Die()
 {
-	dead = true;
-	sprinting = false;
+	ClearStates();
+	AddState(playerState::DEAD);
 	GetWorld()->GetTimerManager().ClearTimer(RegenTimer);
 }
 
 void AMainCharacter::TakeDamage()
 {
 	int value = 15;
-	if (!dead)
+	if (!CheckState(playerState::DEAD))
 	{
 		int dmgHealth = value;
 		int dmgShield = value - value * (1.0 - 0.8); //ARMOR PERC REDUCE
@@ -228,7 +249,7 @@ void AMainCharacter::RegenShield()
 
 void AMainCharacter::FireStart()
 {
-	if (sprinting == false && reloading == false)
+	if (!CheckState(playerState::SPRINTING) && !CheckState(playerState::RELOADING))
 		Weapon->StartFiring(this);
 }
 
@@ -243,9 +264,9 @@ void AMainCharacter::FireStop()
 void AMainCharacter::Reload()
 {
 	FireStop();
-	if (Weapon != nullptr && Weapon->ammoCurrent > 0)
+	if (Weapon != nullptr && Weapon->ammoCurrent > 0 && (Weapon->clipCurrent != Weapon->clipMax) && !CheckState(playerState::SPRINTING))
 	{
-		reloading = true;
+		AddState(playerState::RELOADING);
 		GetWorldTimerManager().SetTimer(ReloadingTimer, this, &AMainCharacter::Reloaded, 2.4f, false, 2.4f);
 	}
 }
@@ -253,7 +274,7 @@ void AMainCharacter::Reload()
 void AMainCharacter::Reloaded()
 {
 	Weapon->Reload();
-	reloading = false;
+	ClearState(playerState::RELOADING);
 	GetWorldTimerManager().ClearTimer(ReloadingTimer);
 }
 
@@ -284,8 +305,9 @@ void AMainCharacter::UpdateAmmoText()
 
 void AMainCharacter::ADSOn()
 {
-	if (Weapon != nullptr)
+	if (Weapon != nullptr && !CheckState(playerState::SPRINTING) && !CheckState(playerState::RELOADING))
 	{
+		AddState(playerState::AIMING);
 		followCamera->Deactivate();
 		UGameplayStatics::GetPlayerController(GetWorld(), 0)->SetViewTarget(Weapon);
 		Weapon->ADSCamera->Activate();
@@ -295,8 +317,40 @@ void AMainCharacter::ADSOn()
 
 void AMainCharacter::ADSOff()
 {
+	ClearState(playerState::AIMING);
 	Weapon->ADSCamera->Deactivate();
 	GetController()->CastToPlayerController()->SetViewTarget(this);
 	followCamera->Activate();
 	GetCharacterMovement()->MaxWalkSpeed += ADSMoveSpeedDecrease;
+}
+
+
+
+void AMainCharacter::AddState(playerState state)
+{
+	if(states.Contains(state))
+	{
+		return;
+	}
+	else
+	{
+		states.Add(state);
+	}
+}
+
+bool AMainCharacter::CheckState(const playerState& state)
+{
+	return states.Contains(state);
+}
+
+void AMainCharacter::ClearState(const playerState& state)
+{
+	states.RemoveAll([&](const playerState& val) {
+		return val == state;
+		});
+}
+
+void AMainCharacter::ClearStates()
+{
+	states.Empty();
 }

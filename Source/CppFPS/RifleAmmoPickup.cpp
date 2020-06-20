@@ -2,6 +2,7 @@
 
 
 #include "RifleAmmoPickup.h"
+#define DEBUG_CUSTOM 1
 
 // Sets default values
 ARifleAmmoPickup::ARifleAmmoPickup()
@@ -65,9 +66,9 @@ void ARifleAmmoPickup::OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActo
 			int &ammoCurrent = character->Weapon->ammoCurrent;
 			int &ammoMax = character->Weapon->ammoMax;
 			ammoCurrent = ammoCurrent + ammoAmount > ammoMax ? ammoMax : ammoCurrent + ammoAmount;
-
+#ifdef DEBUG_CUSTOM
 			UKismetSystemLibrary::PrintString(GetWorld(), "Ammo filled");
-
+#endif
 			this->Destroy();
 		}
 	}

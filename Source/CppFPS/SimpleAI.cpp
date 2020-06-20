@@ -2,6 +2,7 @@
 
 
 #include "SimpleAI.h"
+#define DEBUG_CUSTOM 1
 
 // Sets default values
 ASimpleAI::ASimpleAI()
@@ -40,10 +41,7 @@ ASimpleAI::ASimpleAI()
 void ASimpleAI::BeginPlay()
 {
 	Super::BeginPlay();
-
-	//SpawnDefaultController();
 	moveController = Cast<AAIController>(GetController());
-	
 }
 
 // Called every frame
@@ -56,7 +54,6 @@ void ASimpleAI::Tick(float DeltaTime)
 // Called to bind functionality to input
 void ASimpleAI::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
-	//Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
 void ASimpleAI::OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)

@@ -24,13 +24,20 @@
 #include "Components/TextBlock.h"
 #include "Kismet/GameplayStatics.h"
 
-#ifdef KISMET 
-#define PRINT_STRING(S) UKismetSystemLibrary::PrintString(GetWorld(), S)
-#else
-#define PRINT_STRING(S) ((void)0)
-#endif
-
 #include "MainCharacter.generated.h"
+
+UENUM(BlueprintType)
+enum class playerState : uint8
+{
+	STILL UMETA(DisplayName = "Still"),
+	WALKING UMETA(DisplayName = "Walking"),
+	SPRINTING UMETA(DisplayName = "Sprinting"),
+	CROUCHING UMETA(DisplayName = "Crouching"),
+	AIMING UMETA(DisplayName = "Aiming"),
+	SHOOTING UMETA(DisplayName = "Shooting"),
+	RELOADING UMETA(DisplayName = "Reloading"),
+	DEAD UMETA(DisplayName = "Dead")
+};
 
 UCLASS()
 class CPPFPS_API AMainCharacter : public ACharacter
@@ -87,14 +94,14 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Sprint")
 		int sprintIncreasePercentage = 30;
 
-	//STATES
-	bool dead;
-
 	UPROPERTY(BlueprintReadWrite, Category = "Movement")
 		bool reloading;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Movement")
 		bool sprinting;
+
+	//STATES
+	TArray<playerState> states;
 
 	void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 protected:
@@ -124,6 +131,16 @@ protected:
 
 	void UpdateAmmoText();
 
+	UFUNCTION(BlueprintCallable)
+	void AddState(playerState state);
+
+	UFUNCTION(BlueprintCallable)
+	bool CheckState(const playerState& state);
+
+	UFUNCTION(BlueprintCallable)
+	void ClearState(const playerState& state);
+
+	void ClearStates();
 
 public:
 	// Called every frame

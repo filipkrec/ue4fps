@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Weapon.h"
+#define DEBUG_CUSTOM 1
 
 // Sets default values
 AWeapon::AWeapon()
@@ -69,16 +70,19 @@ void AWeapon::Fire(ACharacter* character)
 				FVector endPoint;
 				if (GetWorld()->LineTraceSingleByChannel(hitResult, MuzzleLocation + direction.Vector() * 100, charVector + LaunchVector, ECC_Visibility, FCollisionQueryParams()))
 				{
+#ifdef DEBUG_CUSTOM
 					if (hitResult.Actor->GetClass() == ProjectileClass.Get())
 					{
 						UKismetSystemLibrary::PrintString(GetWorld(), "BULLET HIT");
 					}
+#endif
 					endPoint = hitResult.ImpactPoint;
 				}
 				else
 					endPoint = hitResult.TraceEnd;
-
+#ifdef DEBUG_CUSTOM
 				UKismetSystemLibrary::PrintString(GetWorld(), "Impact point = " + hitResult.ImpactPoint.ToString());
+#endif
 				FVector LaunchDirection = endPoint - MuzzleLocation;
 
 				LaunchDirection.Normalize();

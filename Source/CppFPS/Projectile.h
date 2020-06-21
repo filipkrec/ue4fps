@@ -41,6 +41,8 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = Movement)
 		UStaticMeshComponent* StaticMesh;
 
+	APawn* shooter;
+
 	int damage;
 
 	UFUNCTION()

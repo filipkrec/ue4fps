@@ -33,8 +33,6 @@ ASimpleAI::ASimpleAI()
 	pawnSensing->SightRadius = 1300.0f;
 	pawnSensing->SetPeripheralVisionAngle(40.0f);
 	pawnSensing->OnSeePawn.AddDynamic(this, &ASimpleAI::OnSeePawn);
-
-	debug = "1";
 }
 
 // Called when the game starts or when spawned
@@ -42,13 +40,14 @@ void ASimpleAI::BeginPlay()
 {
 	Super::BeginPlay();
 	moveController = Cast<AAIController>(GetController());
+
+	GetWorld()->GetTimerManager().SetTimer(patrolMoveHandle, this, &ASimpleAI::moveToRandomReachable, 3.0f, true);
 }
 
 // Called every frame
 void ASimpleAI::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 // Called to bind functionality to input
@@ -63,9 +62,26 @@ void ASimpleAI::OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* Othe
 
 void ASimpleAI::OnSeePawn(APawn* OtherPawn)
 {
-	if (moveController)
-	{
-		this->moveController->MoveToActor(OtherPawn);
-	}
+	this->moveController->MoveToActor(OtherPawn);
+	//GetWorld()->GetTimerManager().ClearTimer(patrolMoveHandle);
+}
+
+
+void ASimpleAI::Alert(APawn* otherPawn)
+{
+	this->moveController->MoveToActor(otherPawn);
+	//GetWorld()->GetTimerManager().ClearTimer(patrolMoveHandle);
+}
+
+
+void ASimpleAI::moveToRandomReachable()
+{
+	FVector reachableLoc = UNavigationSystemV1::GetRandomReachablePointInRadius(GetWorld(), GetActorLocation(), randomLocRadius);
+
+#ifdef DEBUG_CUSTOM
+	UKismetSystemLibrary::PrintString(GetWorld(),reachableLoc.ToString());
+#endif
+	
+	moveController->MoveToLocation(reachableLoc);
 }
 

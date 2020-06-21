@@ -23,6 +23,7 @@
 #include "Projectile_AK47.h"
 #include "Components/TextBlock.h"
 #include "Kismet/GameplayStatics.h"
+#include "Components/Image.h"
 
 #include "MainCharacter.generated.h"
 
@@ -73,6 +74,7 @@ public:
 	UProgressBar* EnergyBar;
 	UTextBlock* ClipText;
 	UTextBlock* AmmoText;
+	UImage* Crosshairs;
 
 	//TIMERS
 	FTimerHandle RegenTimer;

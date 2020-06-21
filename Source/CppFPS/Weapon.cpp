@@ -64,6 +64,7 @@ void AWeapon::Fire(ACharacter* character)
 			if (Projectile != nullptr)
 			{
 				Projectile->damage = damage;
+				Projectile->shooter = character;
 				//Projectile->damage = damage;
 				FVector LaunchVector = direction.Vector() * range;
 				FHitResult hitResult;

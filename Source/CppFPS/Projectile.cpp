@@ -90,6 +90,7 @@ void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimi
 #ifdef DEBUG_CUSTOM
 			UKismetSystemLibrary::PrintString(GetWorld(), FString::FromInt(character->health));
 #endif
+			character->Alert(shooter);
 		}
 	}
 

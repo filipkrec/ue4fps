@@ -64,6 +64,7 @@ void AMainCharacter::BeginPlay()
 		EnergyBar = Player_Shield_Widget->WidgetTree->FindWidget<UProgressBar>("Energy");
 		ClipText = Player_Shield_Widget->WidgetTree->FindWidget<UTextBlock>("Clip");
 		AmmoText = Player_Shield_Widget->WidgetTree->FindWidget<UTextBlock>("Ammo");
+		Crosshairs = Player_Shield_Widget->WidgetTree->FindWidget<UImage>("Crosshairs");
 	}
 
 	if (!CheckState(playerState::DEAD))
@@ -310,6 +311,8 @@ void AMainCharacter::ADSOn()
 		AddState(playerState::AIMING);
 		followCamera->Deactivate();
 		UGameplayStatics::GetPlayerController(GetWorld(), 0)->SetViewTarget(Weapon);
+		if (Crosshairs)
+		Crosshairs->SetVisibility(ESlateVisibility::Hidden);
 		Weapon->ADSCamera->Activate();
 		GetCharacterMovement()->MaxWalkSpeed -= ADSMoveSpeedDecrease;
 	}
@@ -320,6 +323,8 @@ void AMainCharacter::ADSOff()
 	ClearState(playerState::AIMING);
 	Weapon->ADSCamera->Deactivate();
 	GetController()->CastToPlayerController()->SetViewTarget(this);
+	if(Crosshairs)
+	Crosshairs->SetVisibility(ESlateVisibility::Visible);
 	followCamera->Activate();
 	GetCharacterMovement()->MaxWalkSpeed += ADSMoveSpeedDecrease;
 }

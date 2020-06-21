@@ -12,6 +12,7 @@
 #include "Animation/AnimInstance.h"
 #include "UObject/UObjectGlobals.h"
 #include "AIController.h"
+#include "NavigationSystem.h"
 #include "Kismet/KismetSystemLibrary.h"
 
 #include "SimpleAI.generated.h"
@@ -39,9 +40,17 @@ public:
 	UFUNCTION()
 		void OnSeePawn(APawn* OtherPawn);
 
+	void Alert(APawn* otherPawn);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	void moveToRandomReachable();
+
+	FTimerHandle patrolMoveHandle;
+
+	const float randomLocRadius = 500;
 
 public:	
 	// Called every frame
